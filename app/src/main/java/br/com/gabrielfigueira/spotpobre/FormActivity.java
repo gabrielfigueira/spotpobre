@@ -19,8 +19,9 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
 
     private Button btnSalvar;
     private Button btnCancelar;
+    private Playlist playlist;
 
-    private long id;
+    private int id;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,12 +40,13 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         if (it != null){
             try{
                 id = it.getIntExtra("id",0);
-                Playlist playlist = (Playlist)new PlaylistDAO(this).pesquisarPorId(String.valueOf(id));
-                if (playlist != null){
-                    edtTitulo.setText(playlist.getTitulo());
-                    edtAutor.setText(playlist.getAutor());
-                    edtUrl.setText(playlist.getUrl());
+                playlist = (Playlist)new PlaylistDAO(this).pesquisarPorId(String.valueOf(id));
+                if (playlist == null){
+                    playlist = new Playlist();
                 }
+                edtTitulo.setText(playlist.getTitulo());
+                edtAutor.setText(playlist.getAutor());
+                edtUrl.setText(playlist.getUrl());
 
             }catch(Exception e){
                 Log.e("ERRO", e.getMessage());
@@ -58,19 +60,14 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
             super.onBackPressed();
         }else if (v.getId() == R.id.btnSalvar){
             try {
-                String titulo = edtTitulo.getText().toString();
-                String autor = edtAutor.getText().toString();
-                String url = edtUrl.getText().toString();
+                playlist.setTitulo(edtTitulo.getText().toString());
+                playlist.setAutor(edtAutor.getText().toString());
+                playlist.setUrl(edtUrl.getText().toString());
 
                 if ( id == 0){
-                    id = new PlaylistDAO(this).inserir(titulo,autor,url);
+                    id = new PlaylistDAO(this).inserir(playlist);
                 }else{
-                    ContentValues cv = new ContentValues();
-                    cv.put("titulo", titulo);
-                    cv.put("autor", autor);
-                    cv.put("url", url);
-                    cv.put("id", id);
-                    id = new PlaylistDAO(this).atualizar(cv);
+                    id = new PlaylistDAO(this).atualizar(playlist);
                 }
 
             }catch(Exception e){
@@ -80,7 +77,7 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
 
             AlertDialog.Builder dlg = new AlertDialog.Builder(this);
             dlg.setTitle("Playlist App");
-            dlg.setMessage("Operação realizada com sucesso!\nId da playlist = " + id);
+            dlg.setMessage("Operação realizada com sucesso!");
             dlg.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {

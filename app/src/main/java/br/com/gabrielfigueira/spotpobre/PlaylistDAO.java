@@ -18,7 +18,7 @@ public class PlaylistDAO  extends SQLiteOpenHelper {
 
     private final String sql_create =
             "create table playlist("+
-                    "id integer primary_key auto increment,"+
+                    "id integer primary key AUTOINCREMENT,"+
                     "titulo text not null, " +
                     "autor text not null, " +
                     "url string"+
@@ -27,7 +27,7 @@ public class PlaylistDAO  extends SQLiteOpenHelper {
     private SQLiteDatabase db;
 
     public PlaylistDAO(Context context){
-        super(context,"playlist.db",null, 5);
+        super(context,"playlist.db",null, 6);
     }
 
     @Override
@@ -41,25 +41,30 @@ public class PlaylistDAO  extends SQLiteOpenHelper {
         db.execSQL(sql_create);
     }
 
-    public long inserir(String titulo,String autor, String url){
+    public int inserir(Playlist playlist){
         //Definir permissão de escrita
         this.db = getWritableDatabase();
 
         //Especificar parâmetros da inserção
         ContentValues cv = new ContentValues();
-        cv.put("titulo", titulo);
-        cv.put("autor", autor);
-        cv.put("url", url);
+        cv.put("titulo", playlist.getTitulo());
+        cv.put("autor", playlist.getAutor());
+        cv.put("url", playlist.getUrl());
 
         long id = this.db.insert("playlist", null, cv);
-        return id;
+        return (int)id;
     }
 
-    public long atualizar(ContentValues playlist){
+    public int atualizar(Playlist playlist){
+        ContentValues cv = new ContentValues();
+        cv.put("titulo", playlist.getTitulo());
+        cv.put("autor", playlist.getAutor());
+        cv.put("url", playlist.getUrl());
+
         this.db = getWritableDatabase();
         String where = "id = ?";
-        String whereArgs[] = new String[]{playlist.getAsString("id")};
-        return this.db.update("playlist", playlist, where, whereArgs);
+        String whereArgs[] = new String[]{Integer.toString(playlist.getId()) };
+        return (int)this.db.update("playlist", cv, where, whereArgs);
     }
 
     public long remover(String id){
